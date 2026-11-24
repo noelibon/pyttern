@@ -1,13 +1,16 @@
 import io
 
-from antlr4 import CommonTokenStream
+from antlr4 import CommonTokenStream, FileStream
 from antlr4.InputStream import InputStream
+from antlr4.tree.Trees import Trees
 from loguru import logger
 
 from .base_processor_interface import BaseProcessor
 from ..antlr.ludii.LudiiLexer import LudiiLexer
 from ..antlr.ludii.LudiiParser import LudiiParser
 from ..pyttern_error_listener import Python3ErrorListener
+from ..pytternfsm.ludii.ludii_to_pda import Ludii_to_PDA
+from ..simulator.Matcher import Matcher
 
 
 class LudiiProcessor(BaseProcessor):
@@ -38,11 +41,20 @@ class LudiiProcessor(BaseProcessor):
         return tree
 
     def generate_tree_from_file(self, file):
-        file_input = io.open(file, encoding="utf-8")
-        return self.generate_tree_from_stream(file_input)
+        return self.generate_tree_from_stream(FileStream(file, encoding="utf-8"))
 
     def create_pda(self, pattern_tree):
-        pass
+        return Ludii_to_PDA().visit(pattern_tree)
+
+    def find_matches(self, pda, code_tree):
+        # the Matcher only tries the root, so try every ludeme call of the game
+        found = []
+        for node in Trees.descendants(code_tree):
+            if isinstance(node, LudiiParser.FunctionContext):
+                match_set = Matcher.match(pda, node, stop_at_first=True)
+                if match_set.count() > 0:
+                    found.append((node, match_set.matches[0].bindings))
+        return found
 
     def create_matcher(self, fsm, code_tree):
         pass

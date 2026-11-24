@@ -4,6 +4,7 @@ from .base_processor_interface import BaseProcessor, BaseProcessorInterface
 from .java_processor import JavaProcessor
 from .language_utils import determine_language, determine_language_from_code
 from .languages import Languages
+from .ludii_processor import LudiiProcessor
 from .python_processor import PythonProcessor
 
 
@@ -20,6 +21,7 @@ __all__ = [
     "BaseProcessorInterface",
     "JavaProcessor",
     "Languages",
+    "LudiiProcessor",
     "PythonProcessor",
     "determine_language",
     "determine_language_from_code",
